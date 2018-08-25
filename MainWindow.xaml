@@ -3,6 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit" 
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"  
         xmlns:local="clr-namespace:UpdateDataBase"
         mc:Ignorable="d" Icon="logo.ico"
         Title="数据库升级" Height="650" Width="525" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
@@ -15,7 +17,14 @@
     </Window.Resources>
     <Grid>
         <ComboBox x:Name="ServerNameComboBox" ItemsSource="{Binding Path=ConnectionList, UpdateSourceTrigger=PropertyChanged}"  ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}" SelectedItem="{Binding SelectedConnection,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Margin="42,23,0,0" DisplayMemberPath="DBName" VerticalAlignment="Top" Width="294" Height="21"/>
-        <TextBox Text="{Binding SqlText,Mode=TwoWay}" VerticalScrollBarVisibility="Auto" Margin="42,188,42,30" TextWrapping="Wrap" AcceptsReturn="True"/>
+        <!--<TextBox Text="{Binding SqlText,Mode=TwoWay}" VerticalScrollBarVisibility="Auto" Margin="42,188,42,30" TextWrapping="Wrap" AcceptsReturn="True"/>-->
+        <avalonEdit:TextEditor  FontFamily="Consolas" SyntaxHighlighting="XML" ShowLineNumbers="True"  Margin="42,188,42,30" BorderThickness="1"
+                                VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" WordWrap="True" BorderBrush="#FFACACAC">
+
+            <i:Interaction.Behaviors>
+                <local:AvalonEditBehaviour GiveMeTheText="{Binding SqlText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            </i:Interaction.Behaviors>
+        </avalonEdit:TextEditor>
 
         <Label Content="数据库服务器：" HorizontalAlignment="Left" Margin="42,58,0,0" VerticalAlignment="Top" Height="25" Width="94"/>
         <TextBox Text="{Binding SelectedConnection.DBServerName}" HorizontalAlignment="Left" VerticalContentAlignment="Center"  Margin="136,56,0,0" IsEnabled="False" TextWrapping="Wrap" Width="200" FontSize="13" Height="27" VerticalAlignment="Top"/>

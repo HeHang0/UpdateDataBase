@@ -1,4 +1,5 @@
-﻿using Prism.Commands;
+﻿using ICSharpCode.AvalonEdit.Highlighting;
+using Prism.Commands;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -7,6 +8,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
@@ -105,29 +107,41 @@ namespace UpdateDataBase
         private void StartUpdate(string strSql)
         {
             var msg = string.Empty;
+            List<Task> tList = new List<Task>();
             foreach (var item in ConnectionList)
             {
                 if (item.IsChecked)
                 {
-                    try
-                    {
-                        using (SqlConnection conn = new SqlConnection(item.ToString()))
-                        {
-                            if (conn.State != ConnectionState.Open)
-                                conn.Open();
-                            SqlCommand updateCommand = new SqlCommand(strSql, conn);
-
-                            var result = updateCommand.ExecuteNonQuery();
-                            msg += $"数据库{item.DBName}成功执行{result}条记录！\n";
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        msg += $"数据库{item.DBName}执行失败！\n";
-                    }
+                    Task task = Task.Run(() => {
+                        int result = ExcuteCommand(item.ToString(), strSql);
+                        msg += $"数据库{item.DBName}成功执行{result}条记录！\n";
+                    });
+                    tList.Add(task);
                 }
             }
-            MessageBox.Show(msg);
+            Task.WhenAll(tList).ContinueWith(t => {
+                MessageBox.Show(msg);
+            });
+        }
+
+        private int ExcuteCommand(string connectionString, string strSql)
+        {
+            int count = 0;
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    if (conn.State != ConnectionState.Open)
+                        conn.Open();
+                    SqlCommand updateCommand = new SqlCommand(strSql, conn);
+
+                    count = updateCommand.ExecuteNonQuery();
+                }
+            }
+            catch (Exception)
+            {
+            }
+            return count;
         }
     }
 }
